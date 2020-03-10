@@ -135,6 +135,23 @@ def getDaysWithPricePercentage(dataList, difference):
             days.append(x)
     return days
 
+#determine the volume trend in specified days against the days passed.
+def getVolumeTrend(days, start, end):
+    startDate = datetime.strptime(start,"%Y-%m-%d")
+    endDate = datetime.strptime(end,"%Y-%m-%d")
+
+    pass
+
+#determine price the trend in specified days against the days passed.
+def getPriceTrend(days, start, end):
+    startDate = datetime.strptime(start,"%Y-%m-%d")
+    endDate = datetime.strptime(end,"%Y-%m-%d")
+    pass
+
+#figure out how to determine steps in stocks and volume
+#find average volume
+#find all series of days where the volume is increasing and the percentage they increase each day
+
 #Test API call
 @app.route("/Test")
 def Test():
