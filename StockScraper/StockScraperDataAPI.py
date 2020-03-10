@@ -138,7 +138,7 @@ def getDaysWithPricePercentage(dataList, difference):
 #Test API call
 @app.route("/Test")
 def Test():
-    stocks = getStockByDateRange("CSCO","2020-01-01","2020-12-31")
+    stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
     test1 = getDaysWithPricePercentage(stocks,2)   
     test2 = getDaysWithVolumePercentage(stocks,1)
     return "We did it"
