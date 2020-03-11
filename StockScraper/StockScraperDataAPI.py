@@ -33,6 +33,7 @@ with app.app_context():
     stockDB = dbClient[getStockDbName()]
     stockCol = stockDB[getStockColName()]
 
+#Insert a single file to the database
 @app.route('/insertStocksData/<fileName>')
 def insertStocksData(fileName):
     #open the json file at C:\Data\TickersData.json 
@@ -41,7 +42,7 @@ def insertStocksData(fileName):
         status = stockCol.insert_many(data)
         #replace this with status codes
         return "Attempted to insert records"
-
+#Loop through a directory and load all files to the database.
 @app.route('/insertStocksDataWithDirectory/<directory>')
 def insertStocksDataWithDirectory(directory):
     for subdir, dirs, files in os.walk(directory):
@@ -161,22 +162,48 @@ def getPriceTrend(days, start, end):
 
 #figure out how to determine steps in stocks and volume
 #find all series of days where the volume is increasing and the percentage they increase each day
-def findTrends(days, step):
+def findTrendsClose(days, step):
     #compare the day against the previous day if the difference is bigger than the step percentage add it to the list
     #this should find positive and negative trends
+    positiveTrends = []
+    negativeTrends = []
+    inPositiveTrend = False
+    inNegativeTrend = False
+    #only true for the first day
+    start = True
     for day in days:
-        if day is None:
-            avgDif = day/previousDay
-            if avgDif >= step: 
-                pass
+        if day["Date"] == "2019-09-10":
+            print(day["Date"])
+        if day is not None:
+            if start == False:
+                avgDif = float(day["Close"])/float(previousDay["Close"])
+                if(avgDif > 1):
+                    #test for positive trend
+                    d = (avgDif - 1) * 100
+                    if d >= step:
+                        positiveTrends.append(previousDay)
+                        if inPositiveTrend == False:
+                            positiveTrends.append(day)
+                else:
+                    #test for negative trend
+                    d = (1 - avgDif) * 100 
+                    if d >= step:                        
+                        negativeTrends.append(previousDay)
+                        if inNegativeTrend == False:
+                            negativeTrends.append(day)
+        start = False
         previousDay = day
-        print("havent done this part yet")
-    pass
+        #create a dictionary to return both values
+    retDict = dict()
+    retDict['positiveTrends'] = positiveTrends
+    retDict['negativeTrends'] = negativeTrends
+    return retDict
 
 #Test API call
 @app.route("/Test")
 def Test():
-    #stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
+    stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
+    trendTest = findTrendsClose(stocks, 2)
     #test1 = getDaysWithPricePercentage(stocks,2)   
     #test2 = getDaysWithVolumePercentage(stocks,1)
     return "We did it"
