@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import pymongo
 import json
 import datetime
+import os
 from datetime import datetime
 from bson import json_util
 from bson.json_util import dumps
@@ -41,6 +42,16 @@ def insertStocksData(fileName):
         #replace this with status codes
         return "Attempted to insert records"
 
+@app.route('/insertStocksDataWithDirectory/<directory>')
+def insertStocksDataWithDirectory(directory):
+    for subdir, dirs, files in os.walk(directory):
+        for file in files:
+            with open(directory +"\\"+ file) as json_file:
+                data = json.load(json_file)
+                status = stockCol.insert_many(data)
+    return "it might have worked"
+
+        
 #CRUD Methods.
 #getStockByDate
 @app.route("/getStockByDate")
@@ -149,15 +160,25 @@ def getPriceTrend(days, start, end):
     pass
 
 #figure out how to determine steps in stocks and volume
-#find average volume
 #find all series of days where the volume is increasing and the percentage they increase each day
+def findTrends(days, step):
+    #compare the day against the previous day if the difference is bigger than the step percentage add it to the list
+    #this should find positive and negative trends
+    for day in days:
+        if day is None:
+            avgDif = day/previousDay
+            if avgDif >= step: 
+                pass
+        previousDay = day
+        print("havent done this part yet")
+    pass
 
 #Test API call
 @app.route("/Test")
 def Test():
-    stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
-    test1 = getDaysWithPricePercentage(stocks,2)   
-    test2 = getDaysWithVolumePercentage(stocks,1)
+    #stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
+    #test1 = getDaysWithPricePercentage(stocks,2)   
+    #test2 = getDaysWithVolumePercentage(stocks,1)
     return "We did it"
 
 
