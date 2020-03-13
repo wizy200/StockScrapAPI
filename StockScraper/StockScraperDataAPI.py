@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 from bson import json_util
 from bson.json_util import dumps
+import matplotlib.pyplot as plt
+from matplotlib import dates
 
 app = Flask(__name__)
 
@@ -175,6 +177,7 @@ def findTrendsClose(days, step):
         if day["Date"] == "2019-09-10":
             print(day["Date"])
         if day is not None:
+            #break the results out into their own seperate dicts or lists
             if start == False:
                 avgDif = float(day["Close"])/float(previousDay["Close"])
                 if(avgDif > 1):
@@ -199,11 +202,71 @@ def findTrendsClose(days, step):
     retDict['negativeTrends'] = negativeTrends
     return retDict
 
+#find the highClose in a list of stocks
+def findHighClose(days):
+    high = 0
+    for day in days:
+        if float(day["Close"]) > high:
+            high = float(day["Close"])
+    return high
+
+#find the lowClose in a list of stocks
+def findLowClose(days):
+    low = float(days[0]["Close"])
+    for day in days:
+        if float(day["Close"]) < low:
+            low = float(day["Close"])
+    return low
+
+#find the lowVolume in a list of stocks
+def findLowVolume(days):
+    low = float(days[0]["Volume"])
+    for day in days:
+        if float(day["Volume"]) < low:
+            low = float(day["Volume"])
+    return low
+
+
+#find the highVolume in a list of stocks
+def findHighVolume(days):
+    high = float(days[0]["Volume"])
+    for day in days:
+        if float(day["Volume"]) < high:
+            high = float(day["Volume"])
+    return high
+
+#graphing utilities
+
+#plot stock prices
+def plotStockPrices(stocks):
+    days = []
+    prices = []
+    formatter = dates.DateFormatter('%Y-%m-%d')
+    for stock in stocks:
+        #Create a list of stock prices
+        prices.append(float(stock["Close"]))
+        #Create a list of days
+        days.append(stock["Date"])
+    plt.style.use("ggplot")
+    plt.xlabel("Dates")
+    plt.ylabel("Close")
+    plt.title("Stock Analysis")
+    plt.plot(prices)
+    plt.show()
+    return prices
+
+
 #Test API call
 @app.route("/Test")
 def Test():
-    stocks = getStockByDateRange("T","2018-01-01","2020-12-31")
+    stocks = getStockByDateRange("T","2020-01-01","2020-12-31")
+    #The trends are inserting duplicate records into the list. Not sure why.
     trendTest = findTrendsClose(stocks, 2)
+    highVolumeTest = findHighVolume(stocks)
+    lowVolumeTest = findLowVolume(stocks)
+    highCloseTest = findHighClose(stocks)
+    lowCloseTest = findLowClose(stocks)
+    plotStockPricesTest = plotStockPrices(stocks)
     #test1 = getDaysWithPricePercentage(stocks,2)   
     #test2 = getDaysWithVolumePercentage(stocks,1)
     return "We did it"
